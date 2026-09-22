@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Ping &amp; Packet Loss Test</title>
+<style>
+:root{
+  --bg:#060a13; --bg2:#0a1120; --card:#0d1524; --card2:#111b2e;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --fg:#e8eef8; --mut:#8a9ab4; --dim:#5f6f8b;
+  --a1:#2ee6c5; --a2:#4b8cff; --a3:#8b5cf6;
+  --ok:#2ee6a0; --warn:#ffb545; --bad:#ff5f6d;
+  --r:16px; --mw:1120px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(900px 500px at 15% -5%, rgba(75,140,255,.16), transparent 60%),
+    radial-gradient(800px 450px at 88% 4%, rgba(46,230,197,.11), transparent 60%),
+    radial-gradient(700px 500px at 50% 100%, rgba(139,92,246,.09), transparent 60%);
+  background-attachment:fixed;
+}
+html[dir="rtl"] body{font-family:Vazirmatn,"Segoe UI",Tahoma,"Iranian Sans",sans-serif}
+.wrap{max-width:var(--mw);margin:0 auto;padding:0 20px}
+a{color:var(--a1);text-decoration:none}
+
+/* ---------- top bar ---------- */
+header{
+  position:sticky;top:0;z-index:40;
+  background:rgba(6,10,19,.72);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar{display:flex;align-items:center;gap:14px;height:62px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+.logo{
+  width:30px;height:30px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  display:grid;place-items:center;color:#04121a;font-size:15px;font-weight:900;
+}
+.spacer{flex:1}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:6px 12px;border-radius:999px;font-size:12.5px;
+  border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--mut);
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.dot.on{background:var(--ok);box-shadow:0 0 0 3px rgba(46,230,160,.18)}
+.dot.warn{background:var(--warn);box-shadow:0 0 0 3px rgba(255,181,69,.18)}
+.langbtn{
+  cursor:pointer;border:1px solid var(--line2);background:rgba(255,255,255,.05);
+  color:var(--fg);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;
+  transition:.15s;
+}
+.langbtn:hover{background:rgba(255,255,255,.1);border-color:var(--a2)}
+
+/* ---------- hero ---------- */
+.hero{padding:66px 0 30px;text-align:center}
+.tag{
+  display:inline-block;padding:6px 14px;border-radius:999px;font-size:12.5px;
+  color:var(--a1);border:1px solid rgba(46,230,197,.28);background:rgba(46,230,197,.07);
+  margin-bottom:22px;
+}
+h1{
+  font-size:clamp(30px,5.4vw,54px);line-height:1.15;margin:0 0 18px;
+  font-weight:800;letter-spacing:-.6px;
+  background:linear-gradient(100deg,#ffffff 8%,var(--a1) 46%,var(--a2) 78%,var(--a3));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.lede{max-width:660px;margin:0 auto;color:var(--mut);font-size:16.5px}
+
+/* ---------- cards ---------- */
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 20px 50px -28px rgba(0,0,0,.9);
+}
+.pad{padding:24px}
+section{padding:34px 0}
+.h2{font-size:clamp(21px,3vw,29px);font-weight:700;margin:0 0 8px;letter-spacing:-.3px}
+.sub{color:var(--mut);margin:0 0 22px}
+.center{text-align:center}
+
+/* ---------- tester ---------- */
+.tester{margin-top:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 130px;gap:14px}
+.f label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:7px;font-weight:600}
+select,input[type=number]{
+  width:100%;padding:12px 13px;border-radius:11px;
+  background:#0a1220;border:1px solid var(--line2);color:var(--fg);
+  font:inherit;font-size:14.5px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+html[dir="rtl"] select{background-position:13px 50%,18px 50%}
+input[type=number]{background-image:none}
+select:focus,input:focus{outline:none;border-color:var(--a2);box-shadow:0 0 0 3px rgba(75,140,255,.16)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.btn{
+  cursor:pointer;border:0;border-radius:12px;padding:13px 26px;
+  font:inherit;font-size:15px;font-weight:700;color:#04121a;
+  background:linear-gradient(120deg,var(--a1),var(--a2));
+  box-shadow:0 12px 28px -12px rgba(75,140,255,.7);transition:.15s;
+}
+.btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.07)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line2);box-shadow:none;font-weight:600}
+.btn.ghost:hover{color:var(--fg);border-color:var(--a2)}
+.chk{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--a2);cursor:pointer}
+
+/* ---------- results ---------- */
+.res{margin-top:22px;display:none}
+.res.show{display:block}
+.verdict{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:16px 18px;border-radius:13px;margin-bottom:16px;
+  border:1px solid var(--line2);background:rgba(255,255,255,.03);
+}
+.badge{
+  padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;
+  background:rgba(46,230,160,.13);color:var(--ok);border:1px solid rgba(46,230,160,.3);
+}
+.badge.warn{background:rgba(255,181,69,.13);color:var(--warn);border-color:rgba(255,181,69,.3)}
+.badge.bad{background:rgba(255,95,109,.13);color:var(--bad);border-color:rgba(255,95,109,.3)}
+.vtxt{color:var(--mut);font-size:14px;flex:1;min-width:200px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.st{padding:16px 14px;border-radius:13px;background:#0a1220;border:1px solid var(--line);text-align:center}
+.st .k{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+html[dir="rtl"] .st .k{text-transform:none;letter-spacing:0}
+.st .v{font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.st .u{font-size:12px;color:var(--dim);font-weight:500}
+.st.good .v{color:var(--ok)} .st.mid .v{color:var(--warn)} .st.poor .v{color:var(--bad)}
+.bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:14px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2));transition:width .4s}
+.note{margin-top:14px;font-size:13px;color:var(--dim);padding:11px 13px;border-radius:10px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.err{border-color:rgba(255,95,109,.35);color:#ffb9bf;background:rgba(255,95,109,.07)}
+
+/* ---------- history ---------- */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:11px 10px;text-align:start;border-bottom:1px solid var(--line)}
+th{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+html[dir="rtl"] th{text-transform:none;letter-spacing:0}
+td{font-variant-numeric:tabular-nums;color:var(--mut)}
+td.name{color:var(--fg);font-weight:600}
+.hist{display:none}.hist.show{display:block}
+
+/* ---------- guides ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:16px}
+.g{padding:22px}
+.g .n{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  font-weight:800;font-size:14px;margin-bottom:14px;
+  background:linear-gradient(135deg,rgba(46,230,197,.18),rgba(75,140,255,.18));
+  color:var(--a1);border:1px solid rgba(46,230,197,.22);
+}
+.g h3{margin:0 0 8px;font-size:16.5px;font-weight:700}
+.g p{margin:0;color:var(--mut);font-size:14px}
+.g ul{margin:10px 0 0;padding-inline-start:20px;color:var(--mut);font-size:13.5px}
+.g li{margin:5px 0}
+
+/* ---------- reference ---------- */
+.refgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.ref{padding:18px;border-radius:13px;background:#0a1220;border:1px solid var(--line)}
+.ref .t{font-weight:800;font-size:15px;margin-bottom:6px}
+.ref .d{color:var(--mut);font-size:13px}
+.ref.a .t{color:var(--ok)} .ref.b .t{color:#7fe3c4} .ref.c .t{color:var(--warn)} .ref.d2 .t{color:var(--bad)}
+
+footer{padding:40px 0 60px;text-align:center;color:var(--dim);font-size:13px;border-top:1px solid var(--line);margin-top:30px}
+
+@media(max-width:820px){
+  .grid3{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .st:last-child{grid-column:span 2}
+  .hero{padding:44px 0 20px}
+  .pad{padding:18px}
+  .hide-s{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap topbar">
+    <div class="brand"><span class="logo">P</span><span data-i="brand">PingLab</span></div>
+    <div class="spacer"></div>
+    <span class="pill hide-s"><span class="dot" id="dot"></span><span id="mode" data-i="modeChecking">checking…</span></span>
+    <button class="langbtn" id="lang" type="button">فارسی</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <span class="tag" data-i="tag">Measured on the server, not in your browser</span>
+    <h1 data-i="h1">Real ping and packet loss to game regions</h1>
+    <p class="lede" data-i="lede">Pick a game. The server sends real ICMP packets to that game's region and reports min, average, max, jitter and packet loss. Nothing is estimated.</p>
+  </div>
+
+  <!-- ================= TESTER ================= -->
+  <section id="test">
+    <div class="card pad tester">
+      <div class="grid3">
+        <div class="f">
+          <label for="game" data-i="lGame">Game</label>
+          <select id="game"></select>
+        </div>
+        <div class="f">
+          <label for="region" data-i="lRegion">Region</label>
+          <select id="region"></select>
+        </div>
+        <div class="f">
+          <label for="count" data-i="lCount">Packets</label>
+          <input id="count" type="number" min="4" max="30" value="12">
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="run" type="button" data-i="bRun">Start test</button>
+        <button class="btn ghost" id="clear" type="button" data-i="bClear">Clear history</button>
+        <label class="chk"><input type="checkbox" id="tcp"><span data-i="lTcp">Force TCP mode</span></label>
+      </div>
+
+      <div class="res" id="res">
+        <div class="verdict">
+          <span class="badge" id="badge">—</span>
+          <span class="vtxt" id="vtxt"></span>
+        </div>
+        <div class="stats">
+          <div class="st" id="s-min"><div class="k" data-i="kMin">min</div><div class="v">—</div></div>
+          <div class="st" id="s-avg"><div class="k" data-i="kAvg">average</div><div class="v">—</div></div>
+          <div class="st" id="s-max"><div class="k" data-i="kMax">max</div><div class="v">—</div></div>
+          <div class="st" id="s-jit"><div class="k" data-i="kJit">jitter</div><div class="v">—</div></div>
+          <div class="st" id="s-loss"><div class="k" data-i="kLoss">packet loss</div><div class="v">—</div></div>
+        </div>
+        <div class="bar"><i id="bar" style="width:0"></i></div>
+        <div class="note" id="note" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card pad hist" id="hist" style="margin-top:16px">
+      <table>
+        <thead><tr>
+          <th data-i="tTime">time</th><th data-i="tGame">game</th><th data-i="tRegion">region</th>
+          <th data-i="kAvg">avg</th><th data-i="kJit">jitter</th><th data-i="kLoss">loss</th><th data-i="tMode">mode</th>
+        </tr></thead>
+        <tbody id="histb"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= REFERENCE ================= -->
+  <section>
+    <h2 class="h2 center" data-i="refH">How to read the numbers</h2>
+    <p class="sub center" data-i="refS">Average ping matters less than jitter and loss. A steady 90 ms plays better than a 40 ms line that spikes.</p>
+    <div class="refgrid" id="refgrid"></div>
+  </section>
+
+  <!-- ================= GUIDE: PING ================= -->
+  <section>
+    <h2 class="h2" data-i="pingH">Lowering your ping</h2>
+    <p class="sub" data-i="pingS">In order of how much they actually help. The first three are worth more than everything below them combined.</p>
+    <div class="cards" id="pingCards"></div>
+  </section>
+
+  <!-- ================= GUIDE: LOSS ================= -->
+  <section>
+    <h2 class="h2" data-i="lossH">Fixing packet loss</h2>
+    <p class="sub" data-i="lossS">Packet loss is a fault, not a speed problem. Find where packets die, then fix that one hop.</p>
+    <div class="cards" id="lossCards"></div>
+  </section>
+
+  <footer>
+    <div data-i="foot">Measurements run from this server. Results reflect this server's route to each region.</div>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   i18n
+   ========================================================================= */
+var T = {
+en:{
+  brand:"PingLab",
+  modeChecking:"checking…", modeIcmp:"ICMP ping ready", modeTcp:"TCP mode (ICMP blocked)",
+  tag:"Measured on the server, not in your browser",
+  h1:"Real ping and packet loss to game regions",
+  lede:"Pick a game. The server sends real ICMP packets to that game's region and reports min, average, max, jitter and packet loss. Nothing is estimated.",
+  lGame:"Game", lRegion:"Region", lCount:"Packets",
+  bRun:"Start test", bRunning:"Testing…", bClear:"Clear history",
+  lTcp:"Force TCP mode",
+  kMin:"min", kAvg:"average", kMax:"max", kJit:"jitter", kLoss:"packet loss",
+  tTime:"time", tGame:"game", tRegion:"region", tMode:"mode",
+  vExcellent:"Excellent", vGood:"Good", vFair:"Playable", vPoor:"Poor",
+  vxExcellent:"Competitive-grade route. Nothing to fix here.",
+  vxGood:"Comfortable for every genre, including shooters.",
+  vxFair:"Fine for most games; you will feel it in fast shooters.",
+  vxPoor:"Something is wrong on this route — see the sections below.",
+  lossHurt:"Packet loss is the problem here, not the ping.",
+  jitHurt:"Jitter is high — the line is unstable, which causes rubber-banding.",
+  noteTcp:"ICMP was unavailable or filtered, so this was measured with real TCP handshakes. The figures are real but read slightly higher than true ICMP ping.",
+  noteFiltered:"The target answered nothing over ICMP. Measured over TCP instead.",
+  errDns:"That region's endpoint could not be resolved. Check the server's DNS.",
+  errNoMethod:"No way to measure: the ping program is missing and TCP also failed. Install it with: apt install -y iputils-ping",
+  errPing:"The ping command failed on the server.",
+  errTarget:"Unknown selection.",
+  errFast:"Too many tests too quickly. Wait a moment.",
+  errBusy:"Server is busy with other tests. Try again in a few seconds.",
+  errNet:"Could not reach the local test service. Is pingsrv.py running?",
+  refH:"How to read the numbers",
+  refS:"Average ping matters less than jitter and loss. A steady 90 ms plays better than a 40 ms line that spikes.",
+  refs:[
+    ["a","Under 40 ms","Ideal. Competitive shooters feel instant."],
+    ["b","40 – 80 ms","Very good. No perceptible delay in normal play."],
+    ["c","80 – 150 ms","Playable. Noticeable in duels and fast aiming."],
+    ["d2","Over 150 ms, or any loss","Trouble. Above 1% loss is worse than +100 ms of ping."]
+  ],
+  pingH:"Lowering your ping",
+  pingS:"In order of how much they actually help. The first three are worth more than everything below them combined.",
+  ping:[
+    ["1","Pick the nearest region by hand",
+     "Most games auto-pick a region from a one-off measurement taken at launch, and get it wrong. Test each region above, then lock the game to the best one in its settings instead of letting it choose.",
+     ["Test every region for your game, not just the default","Choose the lowest jitter, not the lowest average","Re-check after your ISP changes routes — usually monthly"]],
+    ["2","Use a cable, not Wi-Fi",
+     "Wi-Fi adds 5–30 ms of jitter that no server-side change can undo. One Ethernet cable is the single biggest improvement available to most players.",
+     ["If a cable is impossible, use 5 GHz and sit near the router","Never play over 2.4 GHz — microwaves and neighbours share it","Powerline adapters are a distant second best"]],
+    ["3","Stop competing with your own household",
+     "Ping is queueing delay. A single upload — a cloud backup, a game update, someone else's 4K stream — fills your router's buffer and adds 100+ ms to every packet you send.",
+     ["Pause downloads and cloud sync before playing","Turn on SQM / Smart Queue (fq_codel or cake) if your router has it","Cap upload to ~85% of your real speed to keep the buffer empty"]],
+    ["4","Check the route, not just the speed",
+     "A 500 Mbit line with a bad route is worse than a 50 Mbit line with a good one. Speed is bandwidth; ping is distance and hops. They are unrelated.",
+     ["More bandwidth never lowers ping","A closer server always beats a faster connection","A relay only helps when it shortens the path, not because it is a relay"]],
+    ["5","Keep the machine out of the way",
+     "Background CPU load, an overloaded GPU and power-saving modes all add input-to-screen delay that feels exactly like ping.",
+     ["Cap frame rate a few frames under your monitor's refresh","Turn off in-game v-sync; use the driver's low-latency mode","Set the power plan to high performance while playing"]],
+    ["6","Fix the last mile",
+     "A worn cable, a split phone line or a modem running hot produces errors that get retransmitted — which shows up as ping spikes.",
+     ["Replace cables older than a few years","Keep the modem ventilated and away from power bricks","Ask your ISP for the line's error counters if spikes persist"]]
+  ],
+  lossH:"Fixing packet loss",
+  lossS:"Packet loss is a fault, not a speed problem. Find where packets die, then fix that one hop.",
+  loss:[
+    ["1","Confirm it is real, and where",
+     "Loss on one region but not others is a route problem upstream. Loss on every region is local — your device, cable or ISP.",
+     ["Test two or three regions before blaming anything","Run 30 packets, not 4 — short tests miss intermittent loss","Compare with the network baseline entry in the list"]],
+    ["2","Rule out Wi-Fi first",
+     "Wi-Fi loses packets for reasons that look like nothing: a neighbour's channel, a microwave, a wall, a USB 3 port next to the adapter.",
+     ["Plug in a cable for one match; if loss vanishes, it was Wi-Fi","Change the Wi-Fi channel, then re-test","Keep the router off the floor and out of cabinets"]],
+    ["3","Check the physical link",
+     "Persistent 1–5% loss on a cabled machine is almost always a damaged cable, a dirty connector or a dying port.",
+     ["Swap the Ethernet cable — they fail invisibly","Try another port on the router","Look for CRC errors on the interface if you can"]],
+    ["4","Look for a saturated uplink",
+     "When your upload is full, your router drops what will not fit. Game packets are small and get dropped with everything else.",
+     ["Stop uploads and re-test immediately","Enable QoS and give game traffic priority","Watch for loss that appears only when someone streams"]],
+    ["5","Separate real loss from ICMP policing",
+     "Many routers de-prioritise ping packets under load. That shows as loss while the game itself is fine. The opposite also happens.",
+     ["If ping shows loss but the game feels smooth, suspect ICMP policing","Trust the in-game network graph over any single tool","Use TCP mode above as a second opinion"]],
+    ["6","Escalate with evidence",
+     "An ISP will act on a traceroute that names the hop where loss begins. It will not act on \"my game lags\".",
+     ["Record the time, the region and the loss percentage","Note whether loss is one-way or both","Run the same test at different hours to show a pattern"]]
+  ],
+  foot:"Measurements run from this server. Results reflect this server's route to each region."
+},
+fa:{
+  brand:"پینگ‌لب",
+  modeChecking:"در حال بررسی…", modeIcmp:"پینگ ICMP آماده است", modeTcp:"حالت TCP (ICMP بسته است)",
+  tag:"اندازه‌گیری از روی سرور انجام می‌شود، نه در مرورگر شما",
+  h1:"پینگ و پکت‌لاس واقعی تا ریجن سرورهای بازی",
+  lede:"بازی را انتخاب کنید. سرور بسته‌های واقعی ICMP به ریجن همان بازی می‌فرستد و کمینه، میانگین، بیشینه، جیتر و درصد از دست رفتن بسته‌ها را گزارش می‌کند. هیچ عددی تخمینی نیست.",
+  lGame:"بازی", lRegion:"ریجن", lCount:"تعداد بسته",
+  bRun:"شروع تست", bRunning:"در حال تست…", bClear:"پاک کردن تاریخچه",
+  lTcp:"اجبار به حالت TCP",
+  kMin:"کمینه", kAvg:"میانگین", kMax:"بیشینه", kJit:"جیتر", kLoss:"پکت‌لاس",
+  tTime:"زمان", tGame:"بازی", tRegion:"ریجن", tMode:"حالت",
+  vExcellent:"عالی", vGood:"خوب", vFair:"قابل بازی", vPoor:"ضعیف",
+  vxExcellent:"مسیر در حد بازی رقابتی است. چیزی برای اصلاح وجود ندارد.",
+  vxGood:"برای همهٔ سبک‌ها از جمله شوترها راحت است.",
+  vxFair:"برای بیشتر بازی‌ها مناسب است؛ در شوترهای سریع حسش می‌کنید.",
+  vxPoor:"روی این مسیر مشکلی وجود دارد — بخش‌های پایین را ببینید.",
+  lossHurt:"مشکل اصلی اینجا پکت‌لاس است، نه پینگ.",
+  jitHurt:"جیتر بالاست — خط ناپایدار است و همین باعث پرش و لگ می‌شود.",
+  noteTcp:"ICMP در دسترس نبود یا فیلتر شده بود، بنابراین اندازه‌گیری با دست‌دادن واقعی TCP انجام شد. اعداد واقعی هستند ولی کمی بالاتر از پینگ ICMP واقعی نشان می‌دهند.",
+  noteFiltered:"مقصد به ICMP پاسخی نداد. اندازه‌گیری با TCP انجام شد.",
+  errDns:"آدرس این ریجن قابل resolve نبود. DNS سرور را بررسی کنید.",
+  errNoMethod:"راهی برای اندازه‌گیری نیست: برنامهٔ ping نصب نیست و TCP هم جواب نداد. نصب: apt install -y iputils-ping",
+  errPing:"دستور ping روی سرور اجرا نشد.",
+  errTarget:"انتخاب نامعتبر است.",
+  errFast:"تست‌ها بیش از حد سریع پشت هم اجرا شدند. چند لحظه صبر کنید.",
+  errBusy:"سرور مشغول تست‌های دیگر است. چند ثانیه بعد دوباره تلاش کنید.",
+  errNet:"سرویس تست محلی در دسترس نیست. آیا pingsrv.py در حال اجراست؟",
+  refH:"این اعداد را چطور بخوانیم",
+  refS:"میانگین پینگ کم‌اهمیت‌تر از جیتر و پکت‌لاس است. یک خط ثابت ۹۰ میلی‌ثانیه بهتر از خط ۴۰ میلی‌ثانیه‌ای است که پرش دارد.",
+  refs:[
+    ["a","زیر ۴۰ میلی‌ثانیه","ایده‌آل. شوترهای رقابتی کاملاً بی‌تأخیر حس می‌شوند."],
+    ["b","۴۰ تا ۸۰ میلی‌ثانیه","بسیار خوب. در بازی معمولی هیچ تأخیری حس نمی‌شود."],
+    ["c","۸۰ تا ۱۵۰ میلی‌ثانیه","قابل بازی. در درگیری نزدیک و هدف‌گیری سریع محسوس است."],
+    ["d2","بالای ۱۵۰ میلی‌ثانیه یا هر مقدار پکت‌لاس","مشکل‌دار. پکت‌لاس بالای ۱٪ بدتر از ۱۰۰ میلی‌ثانیه پینگ اضافه است."]
+  ],
+  pingH:"کاهش پینگ",
+  pingS:"به ترتیب میزان تأثیر واقعی. سه مورد اول بیشتر از مجموع همهٔ موارد بعدی اثر دارند.",
+  ping:[
+    ["۱","ریجن نزدیک را دستی انتخاب کنید",
+     "بیشتر بازی‌ها ریجن را با یک اندازه‌گیری لحظه‌ای هنگام اجرا انتخاب می‌کنند و اشتباه می‌کنند. همهٔ ریجن‌ها را بالا تست کنید و بعد در تنظیمات بازی، ریجن بهتر را قفل کنید.",
+     ["همهٔ ریجن‌های بازی را تست کنید، نه فقط پیش‌فرض را","کم‌ترین جیتر را انتخاب کنید، نه کم‌ترین میانگین را","بعد از تغییر مسیر توسط اپراتور دوباره تست کنید — معمولاً ماهی یک بار"]],
+    ["۲","کابل، نه وای‌فای",
+     "وای‌فای بین ۵ تا ۳۰ میلی‌ثانیه جیتر اضافه می‌کند که با هیچ تنظیمی روی سرور جبران نمی‌شود. یک کابل شبکه بزرگ‌ترین بهبود ممکن برای بیشتر بازیکنان است.",
+     ["اگر کابل ممکن نیست، از باند ۵ گیگاهرتز و نزدیک مودم استفاده کنید","روی ۲.۴ گیگاهرتز بازی نکنید — مایکروویو و همسایه‌ها روی همان باند هستند","پاورلاین انتخاب دوم است، نه هم‌سطح کابل"]],
+    ["۳","با خودتان رقابت نکنید",
+     "پینگ در واقع تأخیر صف است. یک آپلود — بکاپ ابری، آپدیت بازی، استریم ۴K یک نفر دیگر — بافر مودم را پر می‌کند و به هر بسته‌ای که می‌فرستید بیش از ۱۰۰ میلی‌ثانیه اضافه می‌کند.",
+     ["قبل از بازی دانلود و سینک ابری را متوقف کنید","اگر مودم SQM یا Smart Queue دارد — مثل fq_codel یا cake — روشنش کنید","آپلود را روی حدود ۸۵٪ سرعت واقعی محدود کنید تا بافر خالی بماند"]],
+    ["۴","به مسیر نگاه کنید، نه فقط به سرعت",
+     "خط ۵۰۰ مگابیت با مسیر بد، بدتر از خط ۵۰ مگابیت با مسیر خوب است. سرعت یعنی پهنای باند؛ پینگ یعنی فاصله و تعداد هاپ. این دو به هم ربطی ندارند.",
+     ["پهنای باند بیشتر هرگز پینگ را کم نمی‌کند","سرور نزدیک‌تر همیشه از اینترنت سریع‌تر بهتر است","واسط فقط وقتی کمک می‌کند که مسیر را کوتاه‌تر کند، نه به‌خاطر واسط بودنش"]],
+    ["۵","سیستم را از سر راه بردارید",
+     "بار پردازنده در پس‌زمینه، کارت گرافیک اشباع‌شده و حالت ذخیرهٔ انرژی، تأخیری از ورودی تا تصویر اضافه می‌کنند که دقیقاً شبیه پینگ حس می‌شود.",
+     ["فریم‌ریت را چند فریم زیر نرخ نوسازی مانیتور محدود کنید","وی‌سینک بازی را خاموش و حالت کم‌تأخیر درایور را روشن کنید","هنگام بازی پاور پلن را روی عملکرد بالا بگذارید"]],
+    ["۶","آخرین مسیر را درست کنید",
+     "کابل فرسوده، خط تلفن اسپلیت‌شده یا مودم داغ باعث خطا می‌شوند و خطا یعنی ارسال مجدد — که به شکل پرش پینگ دیده می‌شود.",
+     ["کابل‌های چندساله را عوض کنید","مودم را خنک و دور از آداپتور برق نگه دارید","اگر پرش ادامه داشت شمارندهٔ خطای خط را از اپراتور بخواهید"]]
+  ],
+  lossH:"رفع پکت‌لاس",
+  lossS:"پکت‌لاس یک خرابی است، نه کمبود سرعت. اول پیدا کنید بسته‌ها کجا از بین می‌روند، بعد همان یک نقطه را درست کنید.",
+  loss:[
+    ["۱","اول مطمئن شوید واقعی است و کجاست",
+     "لاس روی یک ریجن و نه بقیه، یعنی مشکل مسیر در بالادست است. لاس روی همهٔ ریجن‌ها یعنی مشکل محلی است — دستگاه، کابل یا اپراتور شما.",
+     ["قبل از متهم کردن چیزی، دو سه ریجن را تست کنید","۳۰ بسته بفرستید نه ۴ تا — تست کوتاه لاس مقطعی را نمی‌بیند","با گزینهٔ «خط پایهٔ شبکه» در لیست مقایسه کنید"]],
+    ["۲","اول وای‌فای را رد کنید",
+     "وای‌فای به دلایلی بسته گم می‌کند که به چشم نمی‌آیند: کانال همسایه، مایکروویو، یک دیوار، یا پورت USB 3 کنار دانگل.",
+     ["یک مسابقه را با کابل بازی کنید؛ اگر لاس رفت، مشکل وای‌فای بود","کانال وای‌فای را عوض کنید و دوباره تست بگیرید","مودم را روی زمین و داخل کابینت نگذارید"]],
+    ["۳","اتصال فیزیکی را بررسی کنید",
+     "لاس دائمی ۱ تا ۵ درصد روی سیستم کابلی، تقریباً همیشه کابل آسیب‌دیده، کانکتور کثیف یا پورت خراب است.",
+     ["کابل شبکه را عوض کنید — بدون نشانهٔ ظاهری خراب می‌شوند","پورت دیگری روی مودم امتحان کنید","اگر می‌توانید خطاهای CRC کارت شبکه را ببینید"]],
+    ["۴","دنبال آپلود اشباع‌شده باشید",
+     "وقتی آپلود پر است، مودم هرچه جا نشود دور می‌ریزد. بسته‌های بازی کوچک‌اند و همراه بقیه دور ریخته می‌شوند.",
+     ["آپلودها را قطع کنید و بلافاصله تست بگیرید","QoS را روشن کنید و به ترافیک بازی اولویت بدهید","اگر لاس فقط وقتی کسی استریم می‌کند ظاهر می‌شود، همین است"]],
+    ["۵","لاس واقعی را از محدودسازی ICMP جدا کنید",
+     "بعضی مودم‌ها و مسیرها زیر بار، بسته‌های پینگ را کم‌اولویت می‌کنند. نتیجه لاس نشان می‌دهد ولی بازی سالم است. عکسش هم ممکن است.",
+     ["اگر پینگ لاس نشان می‌دهد ولی بازی روان است، به محدودسازی ICMP شک کنید","نمودار شبکهٔ داخل بازی را بر هر ابزار تکی ترجیح دهید","حالت TCP بالا را به‌عنوان نظر دوم استفاده کنید"]],
+    ["۶","با مدرک پیگیری کنید",
+     "اپراتور روی یک traceroute که هاپ شروع لاس را نشان می‌دهد اقدام می‌کند. روی جملهٔ «بازی‌ام لگ دارد» اقدام نمی‌کند.",
+     ["زمان، ریجن و درصد لاس را ثبت کنید","بنویسید لاس یک‌طرفه است یا دوطرفه","همان تست را در ساعت‌های مختلف بگیرید تا الگو دیده شود"]]
+  ],
+  foot:"اندازه‌گیری‌ها از روی همین سرور انجام می‌شود. نتایج مسیر این سرور تا هر ریجن را نشان می‌دهد."
+}};
+
+var L = "en", D = T.en;
+var $ = function(id){ return document.getElementById(id); };
+
+function applyLang(){
+  D = T[L];
+  document.documentElement.lang = L;
+  document.documentElement.dir  = (L === "fa") ? "rtl" : "ltr";
+  document.title = (L === "fa") ? "تست پینگ و پکت‌لاس" : "Ping & Packet Loss Test";
+  $("lang").textContent = (L === "fa") ? "English" : "فارسی";
+
+  var nodes = document.querySelectorAll("[data-i]");
+  for (var i = 0; i < nodes.length; i++){
+    var k = nodes[i].getAttribute("data-i");
+    if (D[k] != null) nodes[i].textContent = D[k];
+  }
+  renderRefs(); renderGuide("pingCards", D.ping); renderGuide("lossCards", D.loss);
+  fillGames(); fillRegions();
+  $("mode").textContent = MODE === null ? D.modeChecking : (MODE ? D.modeIcmp : D.modeTcp);
+  if (LAST) showResult(LAST);
+  renderHist();
+  try { localStorage.setItem("pl_lang", L); } catch(e){}
+}
+
+/* =========================================================================
+   static blocks
+   ========================================================================= */
+function renderRefs(){
+  var h = "";
+  for (var i = 0; i < D.refs.length; i++){
+    var r = D.refs[i];
+    h += '<div class="ref ' + r[0] + '"><div class="t">' + esc(r[1]) +
+         '</div><div class="d">' + esc(r[2]) + '</div></div>';
+  }
+  $("refgrid").innerHTML = h;
+}
+
+function renderGuide(id, list){
+  var h = "";
+  for (var i = 0; i < list.length; i++){
+    var g = list[i], li = "";
+    for (var j = 0; j < g[3].length; j++) li += "<li>" + esc(g[3][j]) + "</li>";
+    h += '<div class="card g"><div class="n">' + esc(g[0]) + '</div><h3>' + esc(g[1]) +
+         '</h3><p>' + esc(g[2]) + '</p><ul>' + li + '</ul></div>';
+  }
+  $(id).innerHTML = h;
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+/* =========================================================================
+   data
+   ========================================================================= */
+var GAMES = [], MODE = null, LAST = null, HIST = [], BUSY = false;
+
+function fillGames(){
+  var sel = $("game"), cur = sel.value, h = "";
+  for (var i = 0; i < GAMES.length; i++){
+    h += '<option value="' + esc(GAMES[i].id) + '">' + esc(GAMES[i][L] || GAMES[i].en) + "</option>";
+  }
+  sel.innerHTML = h;
+  if (cur) sel.value = cur;
+}
+
+function currentGame(){
+  var id = $("game").value;
+  for (var i = 0; i < GAMES.length; i++) if (GAMES[i].id === id) return GAMES[i];
+  return null;
+}
+
+function fillRegions(){
+  var g = currentGame(), sel = $("region"), cur = sel.value, h = "";
+  if (g) for (var i = 0; i < g.regions.length; i++){
+    var r = g.regions[i];
+    h += '<option value="' + esc(r.id) + '">' + esc(r[L] || r.en) + "</option>";
+  }
+  sel.innerHTML = h;
+  if (cur) { sel.value = cur; if (!sel.value && sel.options.length) sel.selectedIndex = 0; }
+}
+
+function label(gid, rid){
+  for (var i = 0; i < GAMES.length; i++){
+    if (GAMES[i].id !== gid) continue;
+    var g = GAMES[i];
+    for (var j = 0; j < g.regions.length; j++){
+      if (g.regions[j].id === rid)
+        return [g[L] || g.en, g.regions[j][L] || g.regions[j].en];
+    }
+    return [g[L] || g.en, rid];
+  }
+  return [gid, rid];
+}
+
+function loadGames(){
+  fetch("/api/games", {cache:"no-store"}).then(function(r){ return r.json(); }).then(function(d){
+    if (!d.ok) throw new Error(d.error || "bad");
+    GAMES = d.games || [];
+    MODE = !!d.icmp;
+    if (d.count){
+      var c = $("count");
+      c.min = d.count.min; c.max = d.count.max; c.value = d.count["default"];
+    }
+    $("dot").className = "dot " + (MODE ? "on" : "warn");
+    $("mode").textContent = MODE ? D.modeIcmp : D.modeTcp;
+    fillGames(); fillRegions();
+  })["catch"](function(){
+    $("dot").className = "dot warn";
+    $("mode").textContent = D.errNet;
+    fail(D.errNet);
+  });
+}
+
+/* =========================================================================
+   run a test
+   ========================================================================= */
+function run(){
+  if (BUSY) return;
+  var g = $("game").value, r = $("region").value;
+  if (!g || !r) return;
+
+  BUSY = true;
+  var btn = $("run");
+  btn.disabled = true; btn.textContent = D.bRunning;
+  $("note").style.display = "none";
+
+  fetch("/api/test", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      game: g, region: r,
+      count: parseInt($("count").value, 10) || 12,
+      mode: $("tcp").checked ? "tcp" : "auto"
+    })
+  }).then(function(res){
+    return res.json().then(function(d){ d._status = res.status; return d; });
+  }).then(function(d){
+    if (!d.ok){
+      var m = {dns:D.errDns, no_method:D.errNoMethod, ping_failed:D.errPing,
+               unknown_target:D.errTarget, too_fast:D.errFast, busy:D.errBusy};
+      fail(m[d.error] || (D.errPing + " (" + esc(d.error || "?") + ")"));
+      return;
+    }
+    d.game = g; d.region = r;
+    LAST = d;
+    showResult(d);
+    HIST.unshift({t:Date.now(), game:g, region:r, avg:d.avg, jitter:d.jitter,
+                  loss:d.loss, mode:d.mode});
+    if (HIST.length > 25) HIST.pop();
+    renderHist();
+  })["catch"](function(){
+    fail(D.errNet);
+  })["finally"](function(){
+    BUSY = false;
+    btn.disabled = false; btn.textContent = D.bRun;
+  });
+}
+
+function fail(msg){
+  $("res").classList.add("show");
+  $("badge").className = "badge bad";
+  $("badge").textContent = "—";
+  $("vtxt").textContent = "";
+  var ids = ["s-min","s-avg","s-max","s-jit","s-loss"];
+  for (var i = 0; i < ids.length; i++){
+    var e = $(ids[i]); e.className = "st";
+    e.querySelector(".v").textContent = "—";
+  }
+  $("bar").style.width = "0";
+  var n = $("note");
+  n.className = "note err"; n.style.display = "block"; n.textContent = msg;
+}
+
+function tier(v, a, b){ return v <= a ? "good" : (v <= b ? "mid" : "poor"); }
+
+function setStat(id, val, unit, cls){
+  var e = $(id);
+  e.className = "st" + (cls ? " " + cls : "");
+  e.querySelector(".v").innerHTML = (val === null || val === undefined)
+    ? "—" : esc(val) + (unit ? '<span class="u"> ' + unit + "</span>" : "");
+}
+
+function showResult(d){
+  $("res").classList.add("show");
+  var msu = (L === "fa") ? "ms" : "ms";
+
+  setStat("s-min", d.min != null ? d.min.toFixed(1) : null, msu, "");
+  setStat("s-avg", d.avg != null ? d.avg.toFixed(1) : null, msu,
+          d.avg != null ? tier(d.avg, 80, 150) : "");
+  setStat("s-max", d.max != null ? d.max.toFixed(1) : null, msu, "");
+  setStat("s-jit", d.jitter != null ? d.jitter.toFixed(1) : null, msu,
+          d.jitter != null ? tier(d.jitter, 8, 25) : "");
+  setStat("s-loss", d.loss != null ? d.loss.toFixed(1) : null, "%",
+          d.loss != null ? tier(d.loss, 0.01, 2) : "");
+
+  // verdict: loss dominates, then jitter, then average
+  var cls, key, extra = "";
+  if (d.loss >= 2 || d.avg == null){ cls = "bad"; key = "vPoor"; extra = " " + D.lossHurt; }
+  else if (d.loss > 0){ cls = "warn"; key = "vFair"; extra = " " + D.lossHurt; }
+  else if (d.jitter != null && d.jitter > 25){ cls = "warn"; key = "vFair"; extra = " " + D.jitHurt; }
+  else if (d.avg <= 40){ cls = ""; key = "vExcellent"; }
+  else if (d.avg <= 80){ cls = ""; key = "vGood"; }
+  else if (d.avg <= 150){ cls = "warn"; key = "vFair"; }
+  else { cls = "bad"; key = "vPoor"; }
+
+  $("badge").className = "badge" + (cls ? " " + cls : "");
+  $("badge").textContent = D[key];
+
+  var nm = label(d.game, d.region);
+  var vx = {vExcellent:D.vxExcellent, vGood:D.vxGood, vFair:D.vxFair, vPoor:D.vxPoor}[key];
+  $("vtxt").textContent = nm[0] + " · " + nm[1] + " — " + vx + extra;
+
+  var pct = d.avg == null ? 0 : Math.max(4, Math.min(100, 100 - (d.avg / 250) * 100));
+  $("bar").style.width = pct + "%";
+
+  var note = "";
+  if (d.note === "icmp_blocked" || d.mode === "tcp") note = D.noteTcp;
+  else if (d.note === "icmp_filtered") note = D.noteFiltered;
+  var n = $("note");
+  if (note){ n.className = "note"; n.style.display = "block"; n.textContent = note; }
+  else n.style.display = "none";
+}
+
+function renderHist(){
+  var box = $("hist");
+  if (!HIST.length){ box.classList.remove("show"); $("histb").innerHTML = ""; return; }
+  box.classList.add("show");
+  var h = "";
+  for (var i = 0; i < HIST.length; i++){
+    var r = HIST[i], nm = label(r.game, r.region);
+    var t = new Date(r.t).toLocaleTimeString(L === "fa" ? "fa-IR" : "en-GB");
+    h += "<tr><td>" + esc(t) + '</td><td class="name">' + esc(nm[0]) + "</td><td>" + esc(nm[1]) +
+         "</td><td>" + (r.avg != null ? r.avg.toFixed(1) : "—") +
+         "</td><td>" + (r.jitter != null ? r.jitter.toFixed(1) : "—") +
+         "</td><td>" + (r.loss != null ? r.loss.toFixed(1) + "%" : "—") +
+         "</td><td>" + esc((r.mode || "").toUpperCase()) + "</td></tr>";
+  }
+  $("histb").innerHTML = h;
+}
+
+/* =========================================================================
+   wire up
+   ========================================================================= */
+$("lang").addEventListener("click", function(){ L = (L === "en") ? "fa" : "en"; applyLang(); });
+$("game").addEventListener("change", fillRegions);
+$("run").addEventListener("click", run);
+$("clear").addEventListener("click", function(){ HIST = []; renderHist(); });
+document.addEventListener("keydown", function(e){
+  if (e.key === "Enter" && !BUSY && e.target.tagName !== "BUTTON") run();
+});
+
+try {
+  var saved = localStorage.getItem("pl_lang");
+  if (saved === "fa" || saved === "en") L = saved;
+} catch(e){}
+
+applyLang();
+loadGames();
+</script>
+</body>
+</html>

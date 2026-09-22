@@ -1,0 +1,114 @@
+{
+  "_README": [
+    "===========================================================================",
+    "  TARGET TABLE  -  THIS FILE IS NEVER SERVED TO THE BROWSER.",
+    "  pingsrv.py refuses to serve *.json / *.py, and /api/games returns only",
+    "  ids and labels. Hosts below stay on the server.",
+    "===========================================================================",
+    "",
+    "  What the defaults are:",
+    "  Public regional network endpoints (Vultr / Hetzner speed-test hosts and",
+    "  anycast resolvers) that sit in the SAME data-center regions the listed",
+    "  games run their servers in. They measure the quality of the route from",
+    "  this server to that region - which is what you actually want to know -",
+    "  but they are NOT the game's own servers. Every host here was verified to",
+    "  resolve; no invented addresses.",
+    "",
+    "  To use real game endpoints instead:",
+    "  replace the \"host\" values below with the ones you trust. Format:",
+    "      \"host\": \"1.2.3.4\"            -> ICMP ping (best: real packet loss)",
+    "      \"host\": \"name.example.com\"   -> resolved once, then ICMP",
+    "      \"port\": 443                  -> optional; used only for TCP mode",
+    "                                       (fallback when ICMP is blocked)",
+    "  Add/remove games and regions freely. Ids must be [a-z0-9_-] and unique.",
+    "",
+    "  After editing:  systemctl restart gameping   (or just reload the page -",
+    "  the file is re-read whenever its mtime changes)."
+  ],
+
+  "endpoints": {
+    "eu_de":  { "host": "fra-de-ping.vultr.com",     "port": 443, "en": "Europe - Frankfurt",  "fa": "اروپا - فرانکفورت" },
+    "eu_de2": { "host": "fsn1-speed.hetzner.com",    "port": 443, "en": "Europe - Falkenstein","fa": "اروپا - فالکنشتاین" },
+    "eu_nl":  { "host": "ams-nl-ping.vultr.com",     "port": 443, "en": "Europe - Amsterdam",  "fa": "اروپا - آمستردام" },
+    "eu_uk":  { "host": "lon-gb-ping.vultr.com",     "port": 443, "en": "Europe - London",     "fa": "اروپا - لندن" },
+    "eu_fr":  { "host": "par-fr-ping.vultr.com",     "port": 443, "en": "Europe - Paris",      "fa": "اروپا - پاریس" },
+    "eu_pl":  { "host": "waw-pl-ping.vultr.com",     "port": 443, "en": "Europe East - Warsaw","fa": "اروپای شرقی - ورشو" },
+    "eu_se":  { "host": "sto-se-ping.vultr.com",     "port": 443, "en": "Europe - Stockholm",  "fa": "اروپا - استکهلم" },
+    "eu_es":  { "host": "mad-es-ping.vultr.com",     "port": 443, "en": "Europe - Madrid",     "fa": "اروپا - مادرید" },
+    "eu_fi":  { "host": "hel1-speed.hetzner.com",    "port": 443, "en": "Europe - Helsinki",   "fa": "اروپا - هلسینکی" },
+    "me_il":  { "host": "tlv-il-ping.vultr.com",     "port": 443, "en": "Middle East",         "fa": "خاورمیانه" },
+    "in_bom": { "host": "bom-in-ping.vultr.com",     "port": 443, "en": "India - Mumbai",      "fa": "هند - بمبئی" },
+    "in_del": { "host": "del-in-ping.vultr.com",     "port": 443, "en": "India - Delhi",       "fa": "هند - دهلی" },
+    "as_sgp": { "host": "sgp-ping.vultr.com",        "port": 443, "en": "Asia - Singapore",    "fa": "آسیا - سنگاپور" },
+    "as_sgp2":{ "host": "sin-speed.hetzner.com",     "port": 443, "en": "Asia - Singapore 2",  "fa": "آسیا - سنگاپور ۲" },
+    "us_east":{ "host": "nj-us-ping.vultr.com",      "port": 443, "en": "US East",             "fa": "آمریکا - شرق" },
+    "us_ash": { "host": "ash-speed.hetzner.com",     "port": 443, "en": "US East - Ashburn",   "fa": "آمریکا - اشبرن" },
+    "us_west":{ "host": "sjo-ca-us-ping.vultr.com",  "port": 443, "en": "US West",             "fa": "آمریکا - غرب" },
+    "us_hil": { "host": "hil-speed.hetzner.com",     "port": 443, "en": "US West - Hillsboro", "fa": "آمریکا - هیلزبورو" },
+    "oce_au": { "host": "syd-au-ping.vultr.com",     "port": 443, "en": "Oceania - Sydney",    "fa": "اقیانوسیه - سیدنی" },
+    "base_cf":{ "host": "one.one.one.one",           "port": 443, "en": "Cloudflare (anycast)","fa": "کلادفلر (انی‌کست)" },
+    "base_gg":{ "host": "dns.google",                "port": 443, "en": "Google (anycast)",    "fa": "گوگل (انی‌کست)" }
+  },
+
+  "games": [
+    { "id": "fortnite",   "en": "Fortnite",             "fa": "فورتنایت",
+      "regions": ["eu_de","eu_uk","me_il","us_east","us_west","as_sgp","oce_au"] },
+
+    { "id": "dota2",      "en": "Dota 2",               "fa": "دوتا ۲",
+      "regions": ["eu_de","eu_pl","me_il","us_east","us_west","as_sgp","in_bom","oce_au"] },
+
+    { "id": "warzone",    "en": "Call of Duty: Warzone","fa": "کال آف دیوتی: وارزون",
+      "regions": ["eu_de","eu_uk","me_il","us_east","us_west","as_sgp"] },
+
+    { "id": "valorant",   "en": "Valorant",             "fa": "والورانت",
+      "regions": ["eu_de","eu_pl","me_il","us_east","us_west","as_sgp","oce_au"] },
+
+    { "id": "cs2",        "en": "Counter-Strike 2",     "fa": "کانتر استرایک ۲",
+      "regions": ["eu_de","eu_se","me_il","us_east","us_west","as_sgp","in_bom"] },
+
+    { "id": "apex",       "en": "Apex Legends",         "fa": "اپکس لجندز",
+      "regions": ["eu_de","eu_uk","me_il","us_east","us_west","as_sgp","oce_au"] },
+
+    { "id": "pubg",       "en": "PUBG: Battlegrounds",  "fa": "پابجی",
+      "regions": ["eu_de","me_il","as_sgp","in_bom","us_east"] },
+
+    { "id": "lol",        "en": "League of Legends",    "fa": "لیگ آو لجندز",
+      "regions": ["eu_fr","eu_pl","me_il","us_east","oce_au"] },
+
+    { "id": "rocket",     "en": "Rocket League",        "fa": "راکت لیگ",
+      "regions": ["eu_nl","me_il","us_east","us_west","as_sgp","oce_au"] },
+
+    { "id": "gta",        "en": "GTA Online / FiveM",   "fa": "جی‌تی‌ای آنلاین / فایوم",
+      "regions": ["eu_de","eu_uk","me_il","us_east","us_west"] },
+
+    { "id": "ow2",        "en": "Overwatch 2",          "fa": "اورواچ ۲",
+      "regions": ["eu_nl","me_il","us_east","us_west","as_sgp"] },
+
+    { "id": "r6",         "en": "Rainbow Six Siege",    "fa": "رینبو سیکس سیج",
+      "regions": ["eu_de","me_il","us_east","as_sgp"] },
+
+    { "id": "eafc",       "en": "EA FC / FIFA",         "fa": "ای‌ای اف‌سی / فیفا",
+      "regions": ["eu_de","eu_uk","me_il","us_east"] },
+
+    { "id": "wow",        "en": "World of Warcraft",    "fa": "ورلد آو وارکرفت",
+      "regions": ["eu_de","eu_fi","us_east","us_west"] },
+
+    { "id": "minecraft",  "en": "Minecraft (servers)",  "fa": "ماینکرفت (سرورها)",
+      "regions": ["eu_de","eu_uk","me_il","us_east","us_west","as_sgp"] },
+
+    { "id": "roblox",     "en": "Roblox",               "fa": "روبلاکس",
+      "regions": ["eu_de","us_east","us_west","as_sgp"] },
+
+    { "id": "genshin",    "en": "Genshin Impact",       "fa": "جنشین ایمپکت",
+      "regions": ["as_sgp","eu_de","us_east"] },
+
+    { "id": "freefire",   "en": "Free Fire / Mobile Legends", "fa": "فری فایر / موبایل لجندز",
+      "regions": ["as_sgp","in_bom","me_il","eu_de"] },
+
+    { "id": "escape",     "en": "Escape from Tarkov",   "fa": "اسکیپ فرام تارکوف",
+      "regions": ["eu_de","eu_nl","me_il","us_east"] },
+
+    { "id": "baseline",   "en": "Network baseline (no game)", "fa": "خط پایهٔ شبکه (بدون بازی)",
+      "regions": ["base_cf","base_gg","eu_de","us_east","as_sgp"] }
+  ]
+}

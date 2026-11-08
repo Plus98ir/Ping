@@ -1,5 +1,8 @@
 # Game Ping &amp; Packet Loss page
 
+
+<p align="center"><a href="https://hits.sh/github.com/Plus98ir/Ping/"><img src="https://hits.sh/github.com/Plus98ir/Ping.svg?style=for-the-badge&label=views&color=2563eb" alt="Views"></a> <a href="https://corenetbase.com/#support"><img src="https://img.shields.io/badge/support-buy%20me%20a%20coffee-e11d2a?style=for-the-badge&logo=buymeacoffee&logoColor=white" alt="Support"></a></p>
+
 **English** · [فارسی](#فارسی)
 
 Three files. Put them anywhere (the example uses `/root/site`) and run on any server.
